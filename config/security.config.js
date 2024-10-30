@@ -36,14 +36,22 @@ const securityConfig = (app) => {
   );
 
   // Configuration CORS
-  const corsOptions = {
-    origin: ["http://localhost:3000", process.env.FRONTEND_URL],
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
-  };
-  app.use(cors(corsOptions));
+  const allowedOrigins = [process.env.FRONTEND_URL, "http://localhost:3000"];
 
+  app.use(
+    cors({
+      origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error("Not allowed by CORS"));
+        }
+      },
+      methods: ["GET", "POST", "PUT", "DELETE"],
+      allowedHeaders: ["Content-Type", "Authorization"],
+      credentials: true,
+    })
+  );
   // Limitation des requêtes
   const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
